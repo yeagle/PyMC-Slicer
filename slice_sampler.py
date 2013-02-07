@@ -6,21 +6,21 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-05
-# last mod 2013-02-06 18:39 DW
+# last mod 2013-02-07 12:32 DW
 #
 
 from pymc.StepMethods import StepMethod
 from pymc.utils import float_dtypes
 from pymc.Node import ZeroProbability
-from pymc import runiform
-from numpy import floor, exp, abs
+from pymc import runiform, rexponential
+from numpy import floor, exp, abs, infty
 
 class Slicer(StepMethod):
   """ 
   Slice Sampler Step Method
   """
 
-  def __init__(self, stochastic, w=1, m=20, n_tune=500, verbose=-1, tally=False):
+  def __init__(self, stochastic, w=1, m=20, n_tune=0, verbose=-1, tally=False):
     """ 
     Slice sampler class initialization
     """
@@ -57,7 +57,8 @@ class Slicer(StepMethod):
     """ 
     Slice step method
     """
-    y = runiform(0,1) * exp(self.loglike)
+    #y = runiform(0,1) * exp(self.loglike)
+    y = self.loglike - rexponential(1)
 
     # Stepping out procedure
     L = self.stochastic.value - self.w*runiform(0,1)
@@ -72,10 +73,12 @@ class Slicer(StepMethod):
       K = K - 1
     self.stochastic.value = runiform(L,R)
     try:
-      y_new = exp(self.loglike)
+      #y_new = exp(self.loglike)
+      y_new = self.loglike
     except ZeroProbability:
       #print("ZeroProbability Warning")
-      y_new = 0.0
+      #y_new = 0.0
+      y_new = -infty
     i = 0
     while(y_new<y):
       i = i+1
@@ -93,10 +96,12 @@ class Slicer(StepMethod):
         break
       self.stochastic.value = runiform(L,R)
       try:
-        y_new = exp(self.loglike)
+        #y_new = exp(self.loglike)
+        y_new = self.loglike
       except ZeroProbability:
         #print("ZeroProbability Warning")
-        y_new = 0.0
+        #y_new = 0.0
+        y_new = -infty
       
 
   def fll(self, value):
@@ -107,9 +112,11 @@ class Slicer(StepMethod):
     try:
       ll = self.loglike
     except ZeroProbability:
-      ll = 0.0
+      #ll = 0.0
+      ll = -infty
     self.stochastic.revert()
-    return exp(ll)
+    #return exp(ll)
+    return ll
 
   def tune(self, verbose=-1):
     """

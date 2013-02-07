@@ -6,13 +6,14 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-06
-# last mod 2013-02-06 18:49 DW
+# last mod 2013-02-07 12:32 DW
 #
 
 # Import relevant modules
 import pymc
 import numpy as np
 
+# example from the PyMC docs
 def mymodel():
   # Some data
   n = 5*np.ones(4,dtype=int)
@@ -33,9 +34,13 @@ def mymodel():
                     observed=True)
   return locals()
 
-def dice():
+# Easy dice example (analytically solvable)
+def dice(data=None):
   #data
-  x = [pymc.rbernoulli(1.0/6.0) for i in range(0,100)]
+  if data == None:
+    x = [pymc.rbernoulli(1.0/6.0) for i in range(0,100)]
+  else:
+    x = data
 
   prob = pymc.Uniform('prob', lower=0, upper=1)
 
@@ -46,5 +51,5 @@ def dice():
 if __name__ == '__main__':
   from slice_sampler import Slicer
   M = pymc.MCMC(dice(), db='pickle')
-  M.use_step_method(Slicer, M.prob, w=.1)
+  M.use_step_method(Slicer, M.prob, w=.1, n_tune=500)
   M.sample(iter=10000, burn=0, thin=1, tune_interval=1)
