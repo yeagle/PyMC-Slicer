@@ -6,7 +6,7 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-06
-# last mod 2013-02-07 12:32 DW
+# last mod 2013-02-07 16:20 DW
 #
 
 # Import relevant modules
@@ -49,7 +49,7 @@ def dice(data=None):
   return locals()
 
 if __name__ == '__main__':
-  from slice_sampler import Slicer
+  from SliceSampler import Slicer
   M = pymc.MCMC(dice(), db='pickle')
   M.use_step_method(Slicer, M.prob, w=.1, n_tune=500)
   M.sample(iter=10000, burn=0, thin=1, tune_interval=1)
