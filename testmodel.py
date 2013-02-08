@@ -6,7 +6,7 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-06
-# last mod 2013-02-07 16:20 DW
+# last mod 2013-02-08 13:10 DW
 #
 
 # Import relevant modules
@@ -53,3 +53,8 @@ if __name__ == '__main__':
   M = pymc.MCMC(dice(), db='pickle')
   M.use_step_method(Slicer, M.prob, w=.1, n_tune=500)
   M.sample(iter=10000, burn=0, thin=1, tune_interval=1)
+
+  M2 = pymc.MCMC(mymodel(), db='pickle')
+  for stoch in M2.stochastics:
+    M2.use_step_method(Slicer, stoch, w=.1, n_tune=500)
+  M2.sample(iter=10000, burn=0, thin=1, tune_interval=1)

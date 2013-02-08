@@ -6,7 +6,7 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-05
-# last mod 2013-02-07 18:30 DW
+# last mod 2013-02-08 13:10 DW
 #
 
 from pymc.StepMethods import StepMethod
@@ -79,22 +79,12 @@ class Slicer(StepMethod):
       #print("ZeroProbability Warning")
       #y_new = 0.0
       y_new = -infty
-    i = 0
     while(y_new<y):
-      i = i+1
-      #print str(y) + "value" + str(self.stochastic.value)
-      #print str(L) + " left | right " + str(R)
-      if not(y_new == -infty):
-        if ((L+(R-L)/2.0) > self.stochastic.value):
-          L = self.stochastic.value
-        else:
-          R = self.stochastic.value
+      if (self.stochastic.value < self.stochastic.last_value):
+        L = float(self.stochastic.value)
+      else:
+        R = float(self.stochastic.value)
       self.stochastic.revert()
-      # For some reason, this algorithm runs into bullshit sometimes
-      if (L == R or i == 50):
-        #print("Something went wrong with the Slice sampler")
-        self.step()
-        break
       self.stochastic.value = runiform(L,R)
       try:
         #y_new = exp(self.loglike)
@@ -103,7 +93,7 @@ class Slicer(StepMethod):
         #print("ZeroProbability Warning")
         #y_new = 0.0
         y_new = -infty
-      print self.stochastic.value
+      #print self.stochastic.value
       
 
   def fll(self, value):
