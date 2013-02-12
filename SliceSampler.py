@@ -6,14 +6,14 @@
 # GPL 3.0+ or (cc) by-sa (http://creativecommons.org/licenses/by-sa/3.0/)
 #
 # created 2013-02-05
-# last mod 2013-02-08 13:10 DW
+# last mod 2013-02-11 19:02 DW
 #
 
 from pymc.StepMethods import StepMethod
 from pymc.utils import float_dtypes
 from pymc.Node import ZeroProbability
 from pymc import runiform, rexponential
-from numpy import floor, exp, abs, infty
+from numpy import floor, abs, infty
 
 class Slicer(StepMethod):
   """ 
@@ -57,7 +57,6 @@ class Slicer(StepMethod):
     """ 
     Slice step method
     """
-    #y = runiform(0,1) * exp(self.loglike)
     y = self.loglike - rexponential(1)
 
     # Stepping out procedure
@@ -71,13 +70,11 @@ class Slicer(StepMethod):
     while(K>0 and y<self.fll(R)):
       R = R + self.w
       K = K - 1
+    #self.stochastic.last_value = self.stochastic.value
     self.stochastic.value = runiform(L,R)
     try:
-      #y_new = exp(self.loglike)
       y_new = self.loglike
     except ZeroProbability:
-      #print("ZeroProbability Warning")
-      #y_new = 0.0
       y_new = -infty
     while(y_new<y):
       if (self.stochastic.value < self.stochastic.last_value):
@@ -87,13 +84,9 @@ class Slicer(StepMethod):
       self.stochastic.revert()
       self.stochastic.value = runiform(L,R)
       try:
-        #y_new = exp(self.loglike)
         y_new = self.loglike
       except ZeroProbability:
-        #print("ZeroProbability Warning")
-        #y_new = 0.0
         y_new = -infty
-      #print self.stochastic.value
       
 
   def fll(self, value):
@@ -104,10 +97,8 @@ class Slicer(StepMethod):
     try:
       ll = self.loglike
     except ZeroProbability:
-      #ll = 0.0
       ll = -infty
     self.stochastic.revert()
-    #return exp(ll)
     return ll
 
   def tune(self, verbose=-1):
